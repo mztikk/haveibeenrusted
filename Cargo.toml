@@ -1,0 +1,14 @@
+[package]
+name = "haveibeenrusted"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "1.16.1", features = ["full"] }
+reqwest = { version = "0.11.9", features = ["gzip", "brotli"] }
+sha1 = "0.10.1"
+regex = "1.5.4"
+lazy_static = "1.4.0"
+base16ct = { version = "0.1.1", features = ["alloc"] }
