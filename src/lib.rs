@@ -17,10 +17,9 @@ impl Hibr {
         }
     }
 
-    pub async fn get_password_count(&self, password: &str) -> reqwest::Result<u32> {
-        let mut hasher = self.sha1.clone();
-        hasher.update(password);
-        let result = hasher.finalize_reset();
+    pub async fn get_password_count(&mut self, password: &str) -> reqwest::Result<u32> {
+        self.sha1.update(password);
+        let result = self.sha1.finalize_reset();
         let hex_hash = base16ct::upper::encode_string(&result);
 
         let hash_prefix = &hex_hash[0..5];
@@ -37,7 +36,7 @@ impl Hibr {
         Ok(0)
     }
 
-    pub async fn is_password_breached(&self, password: &str) -> reqwest::Result<bool> {
+    pub async fn is_password_breached(&mut self, password: &str) -> reqwest::Result<bool> {
         let count = self.get_password_count(password).await?;
         Ok(count > 0)
     }
