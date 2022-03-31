@@ -37,6 +37,11 @@ impl Hibr {
         Ok(0)
     }
 
+    pub async fn is_password_breached(&self, password: &str) -> reqwest::Result<bool> {
+        let count = self.get_password_count(password).await?;
+        Ok(count > 0)
+    }
+
     pub async fn pw_range_search(&self, hash_prefix: &str) -> reqwest::Result<String> {
         let url = format!("https://api.pwnedpasswords.com/range/{}", hash_prefix);
 
