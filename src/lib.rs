@@ -1,11 +1,10 @@
 use regex::Regex;
 use reqwest::Client;
-use sha1::{digest::core_api::CoreWrapper, Digest, Sha1, Sha1Core};
+use sha1::{Digest, Sha1};
 
 pub struct Hibr {
     client: Client,
     pw_response_match: Regex,
-    sha1: CoreWrapper<Sha1Core>,
 }
 
 impl Hibr {
@@ -13,14 +12,16 @@ impl Hibr {
         Self {
             client,
             pw_response_match: Regex::new(r"([0-9a-fA-F]+):([0-9]+)").unwrap(),
-            sha1: Sha1::new(),
         }
     }
 
-    pub async fn get_password_count(&mut self, password: &str) -> reqwest::Result<u32> {
-        self.sha1.update(password);
-        let result = self.sha1.finalize_reset();
-        let hex_hash = base16ct::upper::encode_string(&result);
+    fn get_hash(password: &str) -> String {
+        let hash = Sha1::digest(password.as_bytes());
+        base16ct::upper::encode_string(&hash)
+    }
+
+    pub async fn get_password_count(&self, password: &str) -> reqwest::Result<u32> {
+        let hex_hash = Hibr::get_hash(password);
 
         let hash_prefix = &hex_hash[0..5];
         let hash_suffix = &hex_hash[5..];
@@ -36,7 +37,7 @@ impl Hibr {
         Ok(0)
     }
 
-    pub async fn is_password_breached(&mut self, password: &str) -> reqwest::Result<bool> {
+    pub async fn is_password_breached(&self, password: &str) -> reqwest::Result<bool> {
         let count = self.get_password_count(password).await?;
         Ok(count > 0)
     }
